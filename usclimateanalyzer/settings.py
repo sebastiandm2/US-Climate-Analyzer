@@ -55,7 +55,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.oracle',
         'NAME': 'orcl',
         'USER': 'semartin',
-        'PASSWORD': 'x',
+        'PASSWORD': 'vkxmrmrn',
         'HOST': 'oracle.cise.ufl.edu',
         'PORT': '1521',
     }
