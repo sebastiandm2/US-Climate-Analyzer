@@ -2,6 +2,83 @@ from django.shortcuts import render
 from .models import President, City, Belongsto, Country
 from django.http import HttpResponse
 from django.db import connection
+from matplotlib import pyplot as plt
+
+#A
+def avgCityOverTime(city, yrBottom, yrTop):
+    query = """
+    with temp as (select city, extract(year from dt) as yr, avg(averagetemperature) as yearlyavg from city
+    group by extract(year from dt), city.city)
+    select yr as year, president_name as president, yearlyavg from temp, president
+    where yr <= extract(year from term_end) and yr >= extract(year from term_start) 
+    and yr <= %0s and yr >= %1s
+    and city = %2s
+    """
+
+    cursor = connection.cursor()
+    cursor.execute(query, [yrTop, yrBottom, city])
+    result = cursor.fetchall()
+    cursor.close()
+    return result
+
+#B
+def avgTempPres(president):
+    query = """
+    with temp as (select term_start as s, term_end as e from president where president_name = %0s)
+    select city, avg(averagetemperature) from temp, city
+    where dt >= s and dt <= e
+    group by city
+    """
+
+    cursor = connection.cursor()
+    cursor.execute(query, [president])
+    result = cursor.fetchall()
+    cursor.close()
+    return result
+
+#C
+def compareParty(dtBottom, dtTop):
+    query = """
+    select party, avg(averagetemperature) from president, city
+    where dt < term_end and dt > term_start
+    and dt >= to_date(%0s, \'YYYY-MM-DD\') and dt <= to_date(%1s, \'YYYY-MM-DD\')
+    group by party
+    """
+
+    cursor = connection.cursor()
+    cursor.execute(query, [dtBottom, dtTop])
+    result = cursor.fetchall()
+    cursor.close()
+    return result
+
+def graphParty(dtBottom, dtTop):
+    result = compareParty(dtBottom, dtTop)
+    for t in result:
+        plt.bar(t[0], t[1])
+
+    plt.title('Average Temperature by Party from 01-01-1950 to 2000-01-01')
+    plt.ylabel('Average Temperature (Degrees Celsius)')
+    plt.xlabel('Party')
+    plt.show()
+
+#D
+def avgCityPres(city, president):
+    query = """
+    with temp as (select term_start as s, term_end as e from president where president_name = %0s)
+    select dt, averagetemperature from temp, city
+    where dt >= s and dt <= e
+    and city = %1s
+    """
+
+    cursor = connection.cursor()
+    cursor.execute(query, [president, city])
+    result = cursor.fetchall()
+    cursor.close()
+    return result
+
+def test(request):
+    print(compareParty('1950-01-01', '2000-01-01'))
+    return HttpResponse('Test Executed')
 
 #given a range of time (dtBottom, dtTop), return the city with the lowest average temperature. Display city, state, date, temp
 def findMinTempCity(request):
@@ -178,5 +255,4 @@ def findYear(request):
     state = row[1]
 
     print(city, ',', state, 'had the highest average temperture of', temperature, 'in the year', yr)
-
-    return HttpResponse("findCity successful")
+    return HttpResponse("findYear successful")

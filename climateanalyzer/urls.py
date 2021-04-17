@@ -4,5 +4,5 @@ from . import views
 app_name = 'climateanalyzer'
 
 urlpatterns = [
-    path('', views.findYear),
+    path('', views.test),
 ]
