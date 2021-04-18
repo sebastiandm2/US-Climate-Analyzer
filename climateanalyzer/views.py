@@ -1,8 +1,18 @@
 from django.shortcuts import render
-from .models import President, City, Belongsto, Country
+from .models import President, City, Belongsto, Country, State
 from django.http import HttpResponse
 from django.db import connection
 from matplotlib import pyplot as plt
+
+from django.views import View
+
+
+class Index(View):
+    template = 'index.html'
+
+    def get(self, request):
+        cities = City.objects.raw('select extract(year from dt) as id, avg(averagetemperature) as averagetemperature from city where (dt >= to_date(\'1900-01-01\', \'YYYY-MM-DD\') and city = \'Miami\')group by (extract(year from dt)) order by id asc;')
+        return render(request, self.template, {'cities': cities})
 
 #A
 def avgCityOverTime(city, yrBottom, yrTop):
