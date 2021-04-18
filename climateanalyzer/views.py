@@ -2,7 +2,7 @@ from django.shortcuts import render
 from .models import President, City, Belongsto, Country, State
 from django.http import HttpResponse
 from django.db import connection
-from matplotlib import pyplot as plt
+from .utils import getPlot
 
 from django.views import View
 
@@ -14,8 +14,26 @@ class Index(View):
         cities = City.objects.raw('select extract(year from dt) as id, avg(averagetemperature) as averagetemperature from city where (dt >= to_date(\'1900-01-01\', \'YYYY-MM-DD\') and city = \'Miami\')group by (extract(year from dt)) order by id asc;')
         return render(request, self.template, {'cities': cities})
 
-#A
-def avgCityOverTime(city, yrBottom, yrTop):
+class StateIndex(View):
+    template = 'states_index.html'
+
+    def get(self, request):
+        cities = City.objects.raw('select extract(year from dt) as id, avg(averagetemperature) as averagetemperature from city where (dt >= to_date(\'1900-01-01\', \'YYYY-MM-DD\') and city = \'Miami\')group by (extract(year from dt)) order by id asc;')
+        return render(request, self.template, {'cities': cities})
+
+def mainView(request):
+    return render(request, 'main.html', {'chart': chart})
+
+def test(request):
+    qs = CityYearlyAvg('Miami', '1900', '2013')
+    print(qs)
+    x = [r[0] for r in qs]
+    y = [r[2] for r in qs]
+    chart = getPlot(x, y)
+    return HttpResponse('Test Executed')
+
+#City
+def CityYearlyAvg(city, yrBottom, yrTop):
     query = """
     with temp as (select city, extract(year from dt) as yr, avg(averagetemperature) as yearlyavg from city
     group by extract(year from dt), city.city)
@@ -23,6 +41,7 @@ def avgCityOverTime(city, yrBottom, yrTop):
     where yr <= extract(year from term_end) and yr >= extract(year from term_start) 
     and yr <= %0s and yr >= %1s
     and city = %2s
+    order by year
     """
 
     cursor = connection.cursor()
@@ -31,53 +50,13 @@ def avgCityOverTime(city, yrBottom, yrTop):
     cursor.close()
     return result
 
-#B
-def avgTempPres(president):
-    query = """
-    with temp as (select term_start as s, term_end as e from president where president_name = %0s)
-    select city, avg(averagetemperature) from temp, city
-    where dt >= s and dt <= e
-    group by city
-    """
-
-    cursor = connection.cursor()
-    cursor.execute(query, [president])
-    result = cursor.fetchall()
-    cursor.close()
-    return result
-
-#C
-def compareParty(dtBottom, dtTop):
-    query = """
-    select party, avg(averagetemperature) from president, city
-    where dt < term_end and dt > term_start
-    and dt >= to_date(%0s, \'YYYY-MM-DD\') and dt <= to_date(%1s, \'YYYY-MM-DD\')
-    group by party
-    """
-
-    cursor = connection.cursor()
-    cursor.execute(query, [dtBottom, dtTop])
-    result = cursor.fetchall()
-    cursor.close()
-    return result
-
-def graphParty(dtBottom, dtTop):
-    result = compareParty(dtBottom, dtTop)
-    for t in result:
-        plt.bar(t[0], t[1])
-
-    plt.title('Average Temperature by Party from 01-01-1950 to 2000-01-01')
-    plt.ylabel('Average Temperature (Degrees Celsius)')
-    plt.xlabel('Party')
-    plt.show()
-
-#D
-def avgCityPres(city, president):
+def CityDailyPres(city, president):
     query = """
     with temp as (select term_start as s, term_end as e from president where president_name = %0s)
     select dt, averagetemperature from temp, city
     where dt >= s and dt <= e
     and city = %1s
+    order by dt asc
     """
 
     cursor = connection.cursor()
@@ -86,183 +65,167 @@ def avgCityPres(city, president):
     cursor.close()
     return result
 
-def test(request):
-    print(compareParty('1950-01-01', '2000-01-01'))
-    return HttpResponse('Test Executed')
-
-#given a range of time (dtBottom, dtTop), return the city with the lowest average temperature. Display city, state, date, temp
-def findMinTempCity(request):
-    #parameters
-    _dtBottom = '2000-01-01'
-    _dtTop = '2010-01-01'
-    
-    #returns list w only 1 value
-    result = City.objects.raw('select * from city where averagetemperature = (select min(averagetemperature) as averagetemperature from city where dt >= to_date(%0s, \'YYYY-DD-MM\') and dt < to_date(%1s, \'YYYY-DD-MM\'));', [_dtBottom, _dtTop]) #returns list w only 1 value
-    a = result[0]
-
-    #returns list w only 1 value
-    result = Belongsto.objects.raw('select * from belongsto where city = %s;', [a.city]) 
-    b = result[0]
-
-    #return values?
-    print(a.city, b.state, a.dt, a.averagetemperature)
-
-    return HttpResponse("findMinTempCity successful")
-
-#given a range of time (dtBottom, dtTop), return the city with the highest average temperature. Display city, state, date, temp
-def findMaxTempCity(request):
-    #parameters
-    _dtBottom = '2000-01-01'
-    _dtTop = '2010-01-01'
-    
-    #returns list w only 1 value
-    result = City.objects.raw('select * from city where averagetemperature = (select max(averagetemperature) as averagetemperature from city where dt >= to_date(%0s, \'YYYY-DD-MM\') and dt < to_date(%1s, \'YYYY-DD-MM\'));', [_dtBottom, _dtTop]) #returns list w only 1 value
-    a = result[0]
-
-    #returns list w only 1 value
-    result = Belongsto.objects.raw('select 1 as id, state from belongsto where city = %s;', [a.city]) 
-    b = result[0]
-
-    #return values?
-    print(a.city, b.state, a.dt, a.averagetemperature)
-
-    return HttpResponse("findMaxTempCity successful")
-
-#return the president with the lowest average temperature. Display name, party, termstart, termend
-def findMaxPres(request):
-    #parameters
-    _dtBottom = '1950-01-01'
-    _dtTop = '2010-01-01'
-    
+def CityParty(city, dtBottom, dtTop):
     query = """
-    with bro as
-    (select avg(averagetemperature) as avvg, extract(year from dt) as yr 
-    from country
-    where dt >= to_date(%0s, \'YYYY-DD-MM\') and dt < to_date(%1s, \'YYYY-DD-MM\')
-    group by extract(year from dt))
-    select 1 as id, avvg, yr from bro order by avvg desc fetch first 1 rows only
-    """
-
-    #returns list w only 1 value
-    cursor = connection.cursor()
-    cursor.execute(query, [_dtBottom, _dtTop])
-    result = cursor.fetchall()
-    cursor.close()
-    a = result[0] #tuple
-
-    #returns list w multiple values NEED TO FINISH
-    dtLow = str(a[2]) + '-01-01' #year is in the 2nd element of the tuple
-    dtHigh = str(a[2]) + '-31-12'
-    query = """
-    select * from president where (term_start <= to_date(%0s, \'YYYY-DD-MM\')) and (term_end >= to_date(%1s, \'YYYY-DD-MM\'))
-    """
-    cursor = connection.cursor()
-    cursor.execute(query, [dtLow, dtHigh])
-    result = cursor.fetchall()
-    cursor.close()
-    
-    for p in result:
-        print(p[0],',' ,p[3])
-
-    temperature = a[1]
-    print('The year was', a[2], 'and the temperature was', round(a[1], 2))
-
-    return HttpResponse("findMaxPres successful")
-
-#find which party on average displays the highest temperatures
-def findParty(request):
-    query = """
-    select party, avg(averagetemperature) as avg from president, country
+    select party, avg(averagetemperature) from president, city
     where dt < term_end and dt > term_start
+    and dt >= to_date(%0s, \'YYYY-MM-DD\') and dt <= to_date(%1s, \'YYYY-MM-DD\')
+    and city = %2s
     group by party
     """
 
     cursor = connection.cursor()
-    cursor.execute(query)
+    cursor.execute(query, [dtBottom, dtTop, city])
     result = cursor.fetchall()
     cursor.close()
+    return result
 
-    for p in result:
-        print('The average for the', p[0], 'party is', round(p[1], 2))
-
-    return HttpResponse("findParty successful")
-
-#given a year, return the city that had the highest average temperature that year. Display city, state and temperature
-def findCity(request):
-    #parameters
-    yr = '2000'
-    _dtBottom = yr + '-01-01'
-    _dtTop = yr + '-31-12'
-
+def CityAvgPres(city):
     query = """
-    select avg(averagetemperature) as avg, city from city 
-    where dt >= to_date(%0s, \'YYYY-DD-MM\') and dt <= to_date(%1s, \'YYYY-DD-MM\')
-    group by city
-    order by avg desc
-    fetch first 1 rows only
-    """
-
-    cursor = connection.cursor()
-    cursor.execute(query, [_dtBottom, _dtTop])
-    result = cursor.fetchall()
-    cursor.close()
-
-    row = result[0]
-    city = row[1]
-    temperature = round(row[0], 2)
-
-    query = """
-    select distinct city.city, state 
-    from city inner join belongsto on city.city = belongsto.city where city.city = %s
+    with temp as (select president_name, avg(averagetemperature) as avg from city, president
+    where dt < term_end and dt > term_start
+    and city = %0s
+    group by president_name)
+    select president.president_name, temp.avg from temp, president
+    where temp.president_name = president.president_name
+    order by term_start asc
     """
 
     cursor = connection.cursor()
     cursor.execute(query, [city])
     result = cursor.fetchall()
     cursor.close()
+    return result
 
-    row = result[0]
-    state = row[1]
-
-    print(city, ',', state, 'has the highest average temperture in the year', yr, 'of', temperature)
-
-    return HttpResponse("findCity successful")
-
-#given a city, find the year that had the highest average temperature. Display city, state, year, and temperature
-def findYear(request):
-    #parameters
-    city = 'Miami'
-
+#State
+def StateYearlyAvg(state, yrBottom, yrTop):
     query = """
-    select extract(year from dt), avg(averagetemperature)
-    from city
-    where city.city = %s and averagetemperature is not null
-    group by extract(year from dt)
-    order by avg(averagetemperature) desc
-    fetch first 1 rows only
+    with temp as (select state, extract(year from dt) as yr, avg(averagetemperature) as yearlyavg from state
+    group by extract(year from dt), state.state)
+    select yr as year, president_name as president, yearlyavg from temp, president
+    where yr <= extract(year from term_end) and yr >= extract(year from term_start) 
+    and yr <= %0s and yr >= %1s
+    and state = %2s
+    order by year
     """
 
     cursor = connection.cursor()
-    cursor.execute(query, [city])
+    cursor.execute(query, [yrTop, yrBottom, state])
     result = cursor.fetchall()
     cursor.close()
+    return result
 
-    row = result[0]
-    yr = row[0]
-    temperature = round(row[1], 2)
-
+def StateDailyPres(state, president):
     query = """
-    select distinct city.city, state 
-    from city inner join belongsto on city.city = belongsto.city where city.city = %s
+    with temp as (select term_start as s, term_end as e from president where president_name = %0s)
+    select dt, averagetemperature from temp, state
+    where dt >= s and dt <= e
+    and state = %1s
+    order by dt asc
     """
 
     cursor = connection.cursor()
-    cursor.execute(query, [city])
+    cursor.execute(query, [president, state])
     result = cursor.fetchall()
     cursor.close()
+    return result
 
-    row = result[0]
-    state = row[1]
+def StateParty(state, dtBottom, dtTop):
+    query = """
+    select party, avg(averagetemperature) from president, state
+    where dt < term_end and dt > term_start
+    and dt >= to_date(%0s, \'YYYY-MM-DD\') and dt <= to_date(%1s, \'YYYY-MM-DD\')
+    and state = %2s
+    group by party
+    """
 
-    print(city, ',', state, 'had the highest average temperture of', temperature, 'in the year', yr)
-    return HttpResponse("findYear successful")
+    cursor = connection.cursor()
+    cursor.execute(query, [dtBottom, dtTop, state])
+    result = cursor.fetchall()
+    cursor.close()
+    return result
+
+def StateAvgPres(state):
+    query = """
+    with temp as (select president_name, avg(averagetemperature) as avg from state, president
+    where dt < term_end and dt > term_start
+    and state = %0s
+    group by president_name)
+    select president.president_name, temp.avg from temp, president
+    where temp.president_name = president.president_name
+    order by term_start asc
+    """
+
+    cursor = connection.cursor()
+    cursor.execute(query, [state])
+    result = cursor.fetchall()
+    cursor.close()
+    return result
+
+#Country
+def CountryYearlyAvg(country, yrBottom, yrTop):
+    query = """
+    with temp as (select country, extract(year from dt) as yr, avg(averagetemperature) as yearlyavg from country
+    group by extract(year from dt), country.country)
+    select yr as year, president_name as president, yearlyavg from temp, president
+    where yr <= extract(year from term_end) and yr >= extract(year from term_start) 
+    and yr <= %0s and yr >= %1s
+    and country = %2s
+    order by year
+    """
+
+    cursor = connection.cursor()
+    cursor.execute(query, [yrTop, yrBottom, country])
+    result = cursor.fetchall()
+    cursor.close()
+    return result
+
+def CountryMaxPres(country):
+    query = """
+    with temp as(
+    select president_name as pres, max(averagetemperature) as mx from country, president
+    where dt <= term_end and dt >= term_start
+    and country = %0s
+    group by president_name)
+    select pres, mx from temp, president
+    where temp.pres = president.president_name
+    order by term_start
+    """
+
+    cursor = connection.cursor()
+    cursor.execute(query, [country])
+    result = cursor.fetchall()
+    cursor.close()
+    return result
+
+def CountryParty(country, dtBottom, dtTop):
+    query = """
+    select party, avg(averagetemperature) from president, country
+    where dt < term_end and dt > term_start
+    and dt >= to_date(%0s, \'YYYY-MM-DD\') and dt <= to_date(%1s, \'YYYY-MM-DD\')
+    and country = %2s
+    group by party
+    """
+
+    cursor = connection.cursor()
+    cursor.execute(query, [dtBottom, dtTop, country])
+    result = cursor.fetchall()
+    cursor.close()
+    return result
+
+def CountryAvgPres(country):
+    query = """
+    with temp as (select president_name, avg(averagetemperature) as avg from country, president
+    where dt < term_end and dt > term_start
+    and country = %0s
+    group by president_name)
+    select president.president_name, temp.avg from temp, president
+    where temp.president_name = president.president_name
+    order by term_start asc
+    """
+
+    cursor = connection.cursor()
+    cursor.execute(query, [country])
+    result = cursor.fetchall()
+    cursor.close()
+    return result
