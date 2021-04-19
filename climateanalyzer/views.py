@@ -2,35 +2,57 @@ from django.shortcuts import render
 from .models import President, City, Belongsto, Country, State
 from django.http import HttpResponse
 from django.db import connection
-from .utils import getPlot
+from .utils import getScatterPlot1, getScatterPlot2, getBarPlot, getBarPlot2, getBarPlot3
 
 from django.views import View
 
-
-class Index(View):
-    template = 'index.html'
-
-    def get(self, request):
-        cities = City.objects.raw('select extract(year from dt) as id, avg(averagetemperature) as averagetemperature from city where (dt >= to_date(\'1900-01-01\', \'YYYY-MM-DD\') and city = \'Miami\')group by (extract(year from dt)) order by id asc;')
-        return render(request, self.template, {'cities': cities})
-
-class StateIndex(View):
-    template = 'states_index.html'
-
-    def get(self, request):
-        cities = City.objects.raw('select extract(year from dt) as id, avg(averagetemperature) as averagetemperature from city where (dt >= to_date(\'1900-01-01\', \'YYYY-MM-DD\') and city = \'Miami\')group by (extract(year from dt)) order by id asc;')
-        return render(request, self.template, {'cities': cities})
-
 def mainView(request):
-    return render(request, 'main.html', {'chart': chart})
+    city = 'Boston'
+    state = 'Florida'
+    country = 'United States'
+    yrBottom = '1950'
+    yrTop = '2013'
+    dtBottom = '1900-01-01'
+    dtTop = '2010-01-01'
+    president = 'Bill Jefferson Clinton'
+    
+    table = 'city' #request.POST['table']
+    query = 'yearlyAvg' #request.POST['query']
 
-def test(request):
-    qs = CityYearlyAvg('Miami', '1900', '2013')
-    print(qs)
+
+
+    #City
+    #Yearly Average
+    qs = CityYearlyAvg(city, yrBottom, yrTop)
+    x = [float(r[0])for r in qs]
+    y = [float(r[2]) for r in qs]
+    chart2 = getScatterPlot1(x, y, city, yrBottom, yrTop)
+
+    #Daily Pres
+    qs = CityDailyPres(city, president)
+    x = [r[0]for r in qs]
+    y = [float(r[1]) for r in qs]
+    chart = getScatterPlot2(x, y, president, city)
+
+    #Party
+    qs = CityParty(city, dtBottom, dtTop)
     x = [r[0] for r in qs]
-    y = [r[2] for r in qs]
-    chart = getPlot(x, y)
-    return HttpResponse('Test Executed')
+    y = [r[1] for r in qs]
+    chart = getBarPlot(x, y, city, dtBottom, dtTop)
+
+    #Avg Pres
+    qs = CityAvgPres(city)
+    x = [r[0] for r in qs]
+    y = [r[1] for r in qs]
+    chart = getBarPlot2(x, y, city)
+
+    #Country
+    #Max
+    qs = CountryMaxPres(country)
+    x = [r[0] for r in qs]
+    y = [r[1] for r in qs]
+    chart = getBarPlot3(x, y)
+    return render(request, 'climate/main.html', {'chart': chart2})
 
 #City
 def CityYearlyAvg(city, yrBottom, yrTop):

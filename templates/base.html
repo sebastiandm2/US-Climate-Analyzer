@@ -3,10 +3,11 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <title>Django</title>
     </head>
-    <body>
         <div class="container mt-3">
-            <img src="data:image/png;base64, {{chart|safe}}">
+            {% block content %}
+            {% endblock content %}
         </div>
     </body>
 </html>
