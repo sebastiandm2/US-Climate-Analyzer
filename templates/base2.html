@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <title>US Climate Analyzer</title>
+    </head>
+    <body>
+        <form>
+            <div>
+                <label for="city">City</label>
+                <input type="text" name = "city" id="city" value="Boston">
+            </div>
+            <div>
+                <label for="dtBottom">Start Year</label>
+                <input type="text" name = "dtBottom" id="dtBottom" value="1900">
+            </div>
+            <div>
+                <label for="dtTop">End Year</label>
+                <input type="text" name = "dtTop" id="dtTop" value="2010">
+            </div>
+            <div>
+                <button type="reset">Reset</button>
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+        <div class="container mt-3">
+            {% block content %}
+            {% endblock content %}
+        </div>
+    </body>
+</html>

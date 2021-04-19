@@ -7,99 +7,143 @@ from .utils import getScatterPlot1, getScatterPlot2, getBarPlot, getBarPlot2, ge
 from django.views import View
 
 def mainView(request):
-    city = 'Boston'
+    city = "Boston"
+    yrBottom = "1900"
+    yrTop = "2010"
     state = 'Florida'
     country = 'United States'
-    yrBottom = '1950'
-    yrTop = '2000'
     dtBottom = '1900-01-01'
     dtTop = '2010-01-01'
     president = 'Bill Jefferson Clinton'
-    
-    table = 'city' #request.POST['table']
-    query = 'yearlyAvg' #request.POST['query']
-
-
-
-    #City------------------------------------------------------------------------------------------------------------------------------------------------
-    #Yearly Average
     qs = CityYearlyAvg(city, yrBottom, yrTop)
     x = [float(r[0]) for r in qs]
     z = [r[1] for r in qs]
     y = [float(r[2]) for r in qs]
-    chart = getScatterPlot1(x, y, z, city, yrBottom, yrTop)
 
-    #Daily Pres
-    qs = CityDailyPres(city, president)
-    x = [r[0]for r in qs]
-    y = [float(r[1]) for r in qs]
-    chart = getScatterPlot2(x, y, president, city)
 
-    #Party
-    qs = CityParty(city, dtBottom, dtTop)
-    x = [r[0] for r in qs]
-    y = [r[1] for r in qs]
-    chart = getBarPlot(x, y, city, dtBottom, dtTop)
+    if request.method == 'POST':
+        query = request.POST.get("Query")
+        print("hello")
+        #City------------------------------------------------------------------------------------------------------------------------------------------------
+        #Yearly Average
+        if query == 'C1':
+            city = request.POST['cityname']
+            yrBottom = request.POST['startyear']
+            yrTop = request.POST['endyear']
+            qs = CityYearlyAvg(city, yrBottom, yrTop)
+            x = [float(r[0]) for r in qs]
+            z = [r[1] for r in qs]
+            y = [float(r[2]) for r in qs]
+            chart = getScatterPlot1(x, y, z, city, yrBottom, yrTop)
 
-    #Avg Pres
-    qs = CityAvgPres(city)
-    x = [r[0] for r in qs]
-    y = [r[1] for r in qs]
-    chart = getBarPlot2(x, y, city)
+        #Daily Pres
+        if query == 'C2':
+            city = request.POST['cityname']
+            president = request.POST['president']
+            qs = CityDailyPres(city, president)
+            x = [r[0]for r in qs]
+            y = [float(r[1]) for r in qs]
+            chart = getScatterPlot2(x, y, president, city)
 
-    #State----------------------------------------------------------------------------------------------------------------
-    #Yearly Average
-    qs = StateYearlyAvg(state, yrBottom, yrTop)
-    x = [float(r[0]) for r in qs]
-    z = [r[1] for r in qs]
-    y = [float(r[2]) for r in qs]
-    chart = getScatterPlot1(x, y, z, state, yrBottom, yrTop)
+        #Party
+        if query == 'C3':
+            city = request.POST['cityname']
+            dtBottom = request.POST['startyear']
+            dtTop = request.POST['endyear']
+            qs = CityParty(city, dtBottom, dtTop)
+            x = [r[0] for r in qs]
+            y = [r[1] for r in qs]
+            chart = getBarPlot(x, y, city, dtBottom, dtTop)
 
-    #Daily Pres
-    qs = StateDailyPres(state, president)
-    x = [r[0]for r in qs]
-    y = [float(r[1]) for r in qs]
-    chart = getScatterPlot2(x, y, president, state)
+        #Avg Pres
+        if query == 'C4':
+            city = request.POST['cityname']
+            qs = CityAvgPres(city)
+            x = [r[0] for r in qs]
+            y = [r[1] for r in qs]
+            chart = getBarPlot2(x, y, city)
 
-    #Party
-    qs = StateParty(state, dtBottom, dtTop)
-    x = [r[0] for r in qs]
-    y = [r[1] for r in qs]
-    chart = getBarPlot(x, y, state, dtBottom, dtTop)
+        #State----------------------------------------------------------------------------------------------------------------
+        #Yearly Average
+        if query == 'S1':
+            state = request.POST['statename']
+            yrBottom = request.POST['startyear']
+            yrTop = request.POST['endyear']
+            qs = StateYearlyAvg(state, yrBottom, yrTop)
+            x = [float(r[0]) for r in qs]
+            z = [r[1] for r in qs]
+            y = [float(r[2]) for r in qs]
+            chart = getScatterPlot1(x, y, z, state, yrBottom, yrTop)
 
-    #Avg Pres
-    qs = StateAvgPres(state)
-    x = [r[0] for r in qs]
-    y = [r[1] for r in qs]
-    chart = getBarPlot2(x, y, state)
-    
-    #Country-------------------------------------------------------------------------------------------------------------------------------------------
-    #Yearly Average
-    qs = CountryYearlyAvg(country, yrBottom, yrTop)
-    x = [float(r[0]) for r in qs]
-    z = [r[1] for r in qs]
-    y = [float(r[2]) for r in qs]
-    chart = getScatterPlot1(x, y, z, country, yrBottom, yrTop)
+        #Daily Pres
+        if query == 'S2':
+            state = request.POST['statename']
+            president = request.POST['president']
+            qs = StateDailyPres(state, president)
+            x = [r[0]for r in qs]
+            y = [float(r[1]) for r in qs]
+            chart = getScatterPlot2(x, y, president, state)
 
-    #Max
-    qs = CountryMaxPres(country)
-    x = [r[0] for r in qs]
-    y = [r[1] for r in qs]
-    chart2 = getBarPlot3(x, y)
+        #Party
+        if query == 'S3':
+            state = request.POST['statename']
+            dtBottom = request.POST['startyear']
+            dtTop = request.POST['endyear']
+            qs = StateParty(state, dtBottom, dtTop)
+            x = [r[0] for r in qs]
+            y = [r[1] for r in qs]
+            chart = getBarPlot(x, y, state, dtBottom, dtTop)
 
-    #Party
-    qs = CountryParty(country, dtBottom, dtTop)
-    x = [r[0] for r in qs]
-    y = [r[1] for r in qs]
-    chart = getBarPlot(x, y, country, dtBottom, dtTop)
+        #Avg Pres
+        if query == 'S4':
+            state = request.POST['statename']
+            qs = StateAvgPres(state)
+            x = [r[0] for r in qs]
+            y = [r[1] for r in qs]
+            chart = getBarPlot2(x, y, state)
+        
+        #Country-------------------------------------------------------------------------------------------------------------------------------------------
+        #Yearly Average
+        if query == 'N1':
+            country = request.POST['countryname']
+            yrBottom = request.POST['startyear']
+            yrTop = request.POST['endyear']
+            qs = CountryYearlyAvg(country, yrBottom, yrTop)
+            x = [float(r[0]) for r in qs]
+            z = [r[1] for r in qs]
+            y = [float(r[2]) for r in qs]
+            chart = getScatterPlot1(x, y, z, country, yrBottom, yrTop)
 
-    #Avg Pres
-    qs = CountryAvgPres(country)
-    x = [r[0] for r in qs]
-    y = [r[1] for r in qs]
-    chart= getBarPlot2(x, y, country)
+        #Max
+        if query == 'N2':
+            country = request.POST['countryname']
+            qs = CountryMaxPres(country)
+            x = [r[0] for r in qs]
+            y = [r[1] for r in qs]
+            chart = getBarPlot3(x, y)
 
-    return render(request, 'climate/main.html', {'chart': chart2})
+        #Party
+        if query == 'N3':
+            country = request.POST['countryname']
+            dtBottom = request.POST['startyear']
+            dtTop = request.POST['endyear']
+            qs = CountryParty(country, dtBottom, dtTop)
+            x = [r[0] for r in qs]
+            y = [r[1] for r in qs]
+            chart = getBarPlot(x, y, country, dtBottom, dtTop)
+
+        #Avg Pres
+        if query == 'N4':
+            country = request.POST['countryname']
+            qs = CountryAvgPres(country)
+            x = [r[0] for r in qs]
+            y = [r[1] for r in qs]
+            chart = getBarPlot2(x, y, country)
+
+        return render(request, 'home.html', {'chart': chart})
+    else:
+        chart = getScatterPlot1(x, y, z, city, yrBottom, yrTop)
+        return render(request, 'home.html', {'chart': chart})
 
 #City
 def CityYearlyAvg(city, yrBottom, yrTop):

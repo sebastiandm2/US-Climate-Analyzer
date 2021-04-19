@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{% static 'bootstrap-4.3.1-dist/css/bootstrap.css' %}">
+{% endblock %}
+
+{% block content %}
+    <h1>The Most Beautiful Climate Analyzer You Will Ever See</h1>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm">
+                <h3>City Queries</h3>
+                <div class="row">
+                    <form method="post">
+                        <h5>Yearly Average</h5>
+                        {% csrf_token %}
+                        <input class="row" type="text" name="cityname" placeholder="City Name">
+                        <input class="row" type="text" name="startyear" placeholder="Start Year">
+                        <input class="row" type="text" name="endyear" placeholder="End Year">
+                        <button type="submit" value="C1" name="Query" class="btn-primary">Submit</button>
+                    </form>
+                </div>
+                <div class="row">
+                    <form method="post">
+                        <h5>Query Two</h5>
+                        {% csrf_token %}
+                        <input class="row" type="text" name="cityname" placeholder="City Name">
+                        <input class="row" type="text" name="president" placeholder="President">
+                        <button type="submit" value="C2" name="Query" class="btn-primary">Submit</button>
+                    </form>
+                </div>
+                <div class="row">
+                    <form method="post">
+                        <h5>Query Three</h5>
+                        {% csrf_token %}
+                        <input class="row" type="text" name="cityname" placeholder="City Name">
+                        <input class="row" type="text" name="startyear" placeholder="Start Year">
+                        <input class="row" type="text" name="endyear" placeholder="End Year">
+                        <button type="submit" value="C3" name="Query" class="btn-primary">Submit</button>
+                    </form>
+                </div>
+                <div class="row">
+                    <form method="post">
+                        <h5>Query Four</h5>
+                        {% csrf_token %}
+                        <input class="row" type="text" name="cityname" placeholder="City Name">
+                        <button type="submit" value="C4" name="Query" class="btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-sm">
+                <h3>State Queries</h3>
+                <div class="row">
+                    <form method="post">
+                        <h5>Query One</h5>
+                        {% csrf_token %}
+                        <input class="row" type="text" name="statename" placeholder="State Name">
+                        <input class="row" type="text" name="startyear" placeholder="Start Year">
+                        <input class="row" type="text" name="endyear" placeholder="End Year">
+                        <button type="submit" value="S1" name="Query" class="btn-primary">Submit</button>
+                    </form>
+                </div>
+                <div class="row">
+                    <form method="post">
+                        <h5>Query Two</h5>
+                        {% csrf_token %}
+                        <input class="row" type="text" name="statename" placeholder="State Name">
+                        <input class="row" type="text" name="president" placeholder="President">
+                        <button type="submit" value="S2" name="Query" class="btn-primary">Submit</button>
+                    </form>
+                </div>
+                <div class="row">
+                    <form method="post">
+                        <h5>Query Three</h5>
+                        {% csrf_token %}
+                        <input class="row" type="text" name="statename" placeholder="State Name">
+                        <input class="row" type="text" name="startyear" placeholder="Start Year">
+                        <input class="row" type="text" name="endyear" placeholder="End Year">
+                        <button type="submit" value="S3" name="Query" class="btn-primary">Submit</button>
+                    </form>
+                </div>
+                <div class="row">
+                    <form method="post">
+                        <h5>Query Four</h5>
+                        {% csrf_token %}
+                        <input class="row" type="text" name="statename" placeholder="State Name">
+                        <button type="submit" value="S4" name="Query" class="btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-sm">
+                <h3>Country Queries</h3>
+                <div class="row">
+                    <form method="post">
+                        <h5>Query One</h5>
+                        {% csrf_token %}
+                        <input class="row" type="text" name="countryname" placeholder="Country Name">
+                        <input class="row" type="text" name="startyear" placeholder="Start Year">
+                        <input class="row" type="text" name="endyear" placeholder="End Year">
+                        <button type="submit" value="N1" name="Query" class="btn-primary">Submit</button>
+                    </form>
+                </div>
+                <div class="row">
+                    <form method="post">
+                        <h5>Query Two</h5>
+                        {% csrf_token %}
+                        <input class="row" type="text" name="countryname" placeholder="Country Name">
+                        <input class="row" type="text" name="president" placeholder="President">
+                        <button type="submit" value="N2" name="Query" class="btn-primary">Submit</button>
+                    </form>
+                </div>
+                <div class="row">
+                    <form method="post">
+                        <h5>Query Three</h5>
+                        {% csrf_token %}
+                        <input class="row" type="text" name="countryname" placeholder="Country Name">
+                        <input class="row" type="text" name="startyear" placeholder="Start Year">
+                        <input class="row" type="text" name="endyear" placeholder="End Year">
+                        <button type="submit" value="N3" name="Query" class="btn-primary">Submit</button>
+                    </form>
+                </div>
+                <div class="row">
+                    <form method="post">
+                        <h5>Query Four</h5>
+                        {% csrf_token %}
+                        <input class="row" type="text" name="countryname" placeholder="Country Name">
+                        <button type="submit" value="N4" name="Query" class="btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+                <h2>Data Display</h2>
+        </div>
+
+        <div class="row">
+                <div class="container">
+
+                    <img src="data:image/png;base64, {{chart|safe}}">
+
+                </div>
+        </div>
+    </div>
+{% endblock %}

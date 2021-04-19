@@ -6,7 +6,7 @@ from matplotlib.font_manager import FontProperties
 
 def getGraph():
     buffer = BytesIO()
-    plt.savefig(buffer, format='png')
+    plt.savefig(buffer, format='png', bbox_inches='tight')
     buffer.seek(0)
     img_png = buffer.getvalue()
     graph = base64.b64encode(img_png)
@@ -22,12 +22,17 @@ def getScatterPlot1(x, y, z, location, yrBottom, yrTop):
     plt.ylabel('Average Temperature (Degrees Celsius)')
     plt.xlabel('Year')
     i = 0
-    for a in x:
-        plt.scatter(x[i], y[i])
+    while i < len(x):
+        start = i
+        while i < len(x)-1 and z[i] == z[i+1]:
+            i = i + 1
+        end = i + 1
+        plt.scatter(x[start:end], y[start:end], label=z[start])
         i = i + 1
+    plt.legend(title='Presidents', bbox_to_anchor=(1.05, 1), loc='upper left')
     z = np.polyfit(x, y, 1)
     p = np.poly1d(z)
-    plt.plot(x,p(x),"r--")
+    plt.plot(x,p(x),"k--")
     graph = getGraph()
     return graph
 
@@ -49,14 +54,15 @@ def getBarPlot(x, y, location, dtBottom, dtTop):
     plt.title(title)
     plt.ylabel('Average Temperature (Degrees Celsius)')
     plt.xlabel('Party')
-    plt.bar(x, y)
+    for i in range(len(x)):
+        plt.bar(x[i], y[i])
     graph = getGraph()
     return graph
 
 def getBarPlot2(x, y, location):
     plt.switch_backend('AGG')
-    plt.tight_layout()
-    plt.xticks(rotation=-45)
+    plt.figure(figsize=(10,5))
+    plt.xticks(rotation='vertical')
     title = 'Average Temperature by Presidency in ' + location
     plt.title(title)
     plt.ylabel('Average Temperature (Degrees Celsius)')
@@ -68,7 +74,7 @@ def getBarPlot2(x, y, location):
 def getBarPlot3(x, y):
     plt.switch_backend('AGG')
     plt.figure(figsize=(10,5))
-    plt.xticks(rotation=-45)
+    plt.xticks(rotation='vertical')
     title = 'Max Daily Temperature by Presidency in the US'
     plt.title(title)
     plt.ylabel('Average Temperature (Degrees Celsius)')
