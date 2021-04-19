@@ -11,7 +11,7 @@ def mainView(request):
     state = 'Florida'
     country = 'United States'
     yrBottom = '1950'
-    yrTop = '2013'
+    yrTop = '2000'
     dtBottom = '1900-01-01'
     dtTop = '2010-01-01'
     president = 'Bill Jefferson Clinton'
@@ -21,12 +21,13 @@ def mainView(request):
 
 
 
-    #City
+    #City------------------------------------------------------------------------------------------------------------------------------------------------
     #Yearly Average
     qs = CityYearlyAvg(city, yrBottom, yrTop)
-    x = [float(r[0])for r in qs]
+    x = [float(r[0]) for r in qs]
+    z = [r[1] for r in qs]
     y = [float(r[2]) for r in qs]
-    chart2 = getScatterPlot1(x, y, city, yrBottom, yrTop)
+    chart = getScatterPlot1(x, y, z, city, yrBottom, yrTop)
 
     #Daily Pres
     qs = CityDailyPres(city, president)
@@ -46,12 +47,58 @@ def mainView(request):
     y = [r[1] for r in qs]
     chart = getBarPlot2(x, y, city)
 
-    #Country
+    #State----------------------------------------------------------------------------------------------------------------
+    #Yearly Average
+    qs = StateYearlyAvg(state, yrBottom, yrTop)
+    x = [float(r[0]) for r in qs]
+    z = [r[1] for r in qs]
+    y = [float(r[2]) for r in qs]
+    chart = getScatterPlot1(x, y, z, state, yrBottom, yrTop)
+
+    #Daily Pres
+    qs = StateDailyPres(state, president)
+    x = [r[0]for r in qs]
+    y = [float(r[1]) for r in qs]
+    chart = getScatterPlot2(x, y, president, state)
+
+    #Party
+    qs = StateParty(state, dtBottom, dtTop)
+    x = [r[0] for r in qs]
+    y = [r[1] for r in qs]
+    chart = getBarPlot(x, y, state, dtBottom, dtTop)
+
+    #Avg Pres
+    qs = StateAvgPres(state)
+    x = [r[0] for r in qs]
+    y = [r[1] for r in qs]
+    chart = getBarPlot2(x, y, state)
+    
+    #Country-------------------------------------------------------------------------------------------------------------------------------------------
+    #Yearly Average
+    qs = CountryYearlyAvg(country, yrBottom, yrTop)
+    x = [float(r[0]) for r in qs]
+    z = [r[1] for r in qs]
+    y = [float(r[2]) for r in qs]
+    chart = getScatterPlot1(x, y, z, country, yrBottom, yrTop)
+
     #Max
     qs = CountryMaxPres(country)
     x = [r[0] for r in qs]
     y = [r[1] for r in qs]
-    chart = getBarPlot3(x, y)
+    chart2 = getBarPlot3(x, y)
+
+    #Party
+    qs = CountryParty(country, dtBottom, dtTop)
+    x = [r[0] for r in qs]
+    y = [r[1] for r in qs]
+    chart = getBarPlot(x, y, country, dtBottom, dtTop)
+
+    #Avg Pres
+    qs = CountryAvgPres(country)
+    x = [r[0] for r in qs]
+    y = [r[1] for r in qs]
+    chart= getBarPlot2(x, y, country)
+
     return render(request, 'climate/main.html', {'chart': chart2})
 
 #City

@@ -14,7 +14,7 @@ def getGraph():
     buffer.close()
     return graph
 
-def getScatterPlot1(x, y, location, yrBottom, yrTop):
+def getScatterPlot1(x, y, z, location, yrBottom, yrTop):
     plt.switch_backend('AGG')
     plt.figure(figsize=(10,5))
     title = 'Average Yearly Temperature in ' + location + ' from ' + yrBottom + ' to ' + yrTop
@@ -67,9 +67,9 @@ def getBarPlot2(x, y, location):
 
 def getBarPlot3(x, y):
     plt.switch_backend('AGG')
-    plt.tight_layout()
+    plt.figure(figsize=(10,5))
     plt.xticks(rotation=-45)
-    title = 'Max Daily Temperature by Presidency'
+    title = 'Max Daily Temperature by Presidency in the US'
     plt.title(title)
     plt.ylabel('Average Temperature (Degrees Celsius)')
     plt.xlabel('President')
