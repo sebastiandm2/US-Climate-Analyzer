@@ -3,6 +3,7 @@ import base64
 import numpy as np
 from io import BytesIO
 from matplotlib.font_manager import FontProperties
+import matplotlib.patheffects as path_effects
 
 def getGraph():
     buffer = BytesIO()
@@ -12,6 +13,16 @@ def getGraph():
     graph = base64.b64encode(img_png)
     graph = graph.decode('utf-8')
     buffer.close()
+    return graph
+
+def displayText(numCity, numCountry, numState, numPres):
+    plt.switch_backend('AGG')
+    fig = plt.figure(figsize=(10,5))
+    sum = numCity + numCountry + numState + numPres
+    tuples = 'Tuples in City: ' + str(numCity) + '\nTuples in State: ' + str(numState) + '\nTuples in Country: ' + str(numCountry) + '\nTuples in President: ' + str(numPres) + '\nTotal: ' + str(sum)
+    text = fig.text(0.5, 0.5, tuples, ha='center', va='center', size=20)
+    text.set_path_effects([path_effects.Normal()])
+    graph = getGraph()
     return graph
 
 def getScatterPlot1(x, y, z, location, yrBottom, yrTop):

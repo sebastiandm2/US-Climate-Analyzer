@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    <h1>The Most Beautiful Climate Analyzer You Will Ever See</h1>
+    <h1>US Climate Analyzer (1900-2013)</h1>
     <div class="container">
         <div class="row">
             <div class="col-sm">
@@ -23,7 +23,7 @@
                 </div>
                 <div class="row">
                     <form method="post">
-                        <h5>Query Two</h5>
+                        <h5>During Presidential Term</h5>
                         {% csrf_token %}
                         <input class="row" type="text" name="cityname" placeholder="City Name">
                         <input class="row" type="text" name="president" placeholder="President">
@@ -32,7 +32,7 @@
                 </div>
                 <div class="row">
                     <form method="post">
-                        <h5>Query Three</h5>
+                        <h5>By Party</h5>
                         {% csrf_token %}
                         <input class="row" type="text" name="cityname" placeholder="City Name">
                         <input class="row" type="text" name="startyear" placeholder="Start Year">
@@ -42,7 +42,7 @@
                 </div>
                 <div class="row">
                     <form method="post">
-                        <h5>Query Four</h5>
+                        <h5>By Presidency</h5>
                         {% csrf_token %}
                         <input class="row" type="text" name="cityname" placeholder="City Name">
                         <button type="submit" value="C4" name="Query" class="btn-primary">Submit</button>
@@ -53,7 +53,7 @@
                 <h3>State Queries</h3>
                 <div class="row">
                     <form method="post">
-                        <h5>Query One</h5>
+                        <h5>Yearly Average</h5>
                         {% csrf_token %}
                         <input class="row" type="text" name="statename" placeholder="State Name">
                         <input class="row" type="text" name="startyear" placeholder="Start Year">
@@ -63,7 +63,7 @@
                 </div>
                 <div class="row">
                     <form method="post">
-                        <h5>Query Two</h5>
+                        <h5>During Presidential Term</h5>
                         {% csrf_token %}
                         <input class="row" type="text" name="statename" placeholder="State Name">
                         <input class="row" type="text" name="president" placeholder="President">
@@ -72,7 +72,7 @@
                 </div>
                 <div class="row">
                     <form method="post">
-                        <h5>Query Three</h5>
+                        <h5>By Party</h5>
                         {% csrf_token %}
                         <input class="row" type="text" name="statename" placeholder="State Name">
                         <input class="row" type="text" name="startyear" placeholder="Start Year">
@@ -82,7 +82,7 @@
                 </div>
                 <div class="row">
                     <form method="post">
-                        <h5>Query Four</h5>
+                        <h5>By Presidency</h5>
                         {% csrf_token %}
                         <input class="row" type="text" name="statename" placeholder="State Name">
                         <button type="submit" value="S4" name="Query" class="btn-primary">Submit</button>
@@ -93,7 +93,7 @@
                 <h3>Country Queries</h3>
                 <div class="row">
                     <form method="post">
-                        <h5>Query One</h5>
+                        <h5>Yearly Average</h5>
                         {% csrf_token %}
                         <input class="row" type="text" name="countryname" placeholder="Country Name">
                         <input class="row" type="text" name="startyear" placeholder="Start Year">
@@ -103,7 +103,7 @@
                 </div>
                 <div class="row">
                     <form method="post">
-                        <h5>Query Two</h5>
+                        <h5>Max During Presidency</h5>
                         {% csrf_token %}
                         <input class="row" type="text" name="countryname" placeholder="Country Name">
                         <input class="row" type="text" name="president" placeholder="President">
@@ -112,7 +112,7 @@
                 </div>
                 <div class="row">
                     <form method="post">
-                        <h5>Query Three</h5>
+                        <h5>By Party</h5>
                         {% csrf_token %}
                         <input class="row" type="text" name="countryname" placeholder="Country Name">
                         <input class="row" type="text" name="startyear" placeholder="Start Year">
@@ -122,13 +122,21 @@
                 </div>
                 <div class="row">
                     <form method="post">
-                        <h5>Query Four</h5>
+                        <h5>By Presidency</h5>
                         {% csrf_token %}
                         <input class="row" type="text" name="countryname" placeholder="Country Name">
                         <button type="submit" value="N4" name="Query" class="btn-primary">Submit</button>
                     </form>
                 </div>
             </div>
+        </div>
+
+        <div class="row">
+            <form method="post">
+                <h2>Total Rows</h2>
+                {% csrf_token %}
+                <button type="submit" value="T" name="Query" class="btn-primary">Calculate</button>
+            </form>
         </div>
 
         <div class="row">

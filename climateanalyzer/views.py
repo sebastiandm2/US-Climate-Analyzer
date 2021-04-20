@@ -2,9 +2,29 @@ from django.shortcuts import render
 from .models import President, City, Belongsto, Country, State
 from django.http import HttpResponse
 from django.db import connection
-from .utils import getScatterPlot1, getScatterPlot2, getBarPlot, getBarPlot2, getBarPlot3
+from .utils import getScatterPlot1, getScatterPlot2, getBarPlot, getBarPlot2, getBarPlot3, displayText
 
 from django.views import View
+
+def numTuples(table):
+    query = 'select count(*) from ' + table + ' where dt >= to_date(\'1900-01-01\', \'YYYY-MM-DD\') and averagetemperature is not null'
+
+    cursor = connection.cursor()
+    cursor.execute(query)
+    result = cursor.fetchall()
+    cursor.close()
+    a = result[0]
+    return a[0]
+
+def numPresTuples(table):
+    query = 'select count(*) from ' + table
+
+    cursor = connection.cursor()
+    cursor.execute(query)
+    result = cursor.fetchall()
+    cursor.close()
+    a = result[0]
+    return a[0]
 
 def mainView(request):
     city = "Boston"
@@ -23,7 +43,6 @@ def mainView(request):
 
     if request.method == 'POST':
         query = request.POST.get("Query")
-        print("hello")
         #City------------------------------------------------------------------------------------------------------------------------------------------------
         #Yearly Average
         if query == 'C1':
@@ -139,6 +158,13 @@ def mainView(request):
             x = [r[0] for r in qs]
             y = [r[1] for r in qs]
             chart = getBarPlot2(x, y, country)
+
+        if query == 'T':
+            numCity = numTuples('city')
+            numState = numTuples('state')
+            numCountry = numTuples('country')
+            numPres = numPresTuples('president')
+            chart = displayText(numCity, numCountry, numState, numPres)
 
         return render(request, 'home.html', {'chart': chart})
     else:
